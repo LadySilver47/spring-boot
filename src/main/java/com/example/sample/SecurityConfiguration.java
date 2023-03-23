@@ -2,6 +2,7 @@ package com.example.sample;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,7 +12,7 @@ import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableMethodSecurity(securedEnabled = true)
+@EnableGlobalMethodSecurity(securedEnabled = true)
 @EnableWebSecurity
 public class SecurityConfiguration {
 
@@ -33,13 +34,14 @@ public class SecurityConfiguration {
        return http.authorizeHttpRequests(auth -> {
            try {
                auth
-                       .requestMatchers("/api/courses").permitAll()
-                       .requestMatchers("/api/developers/labs").hasAuthority("Everyone")
+                       .requestMatchers("/").permitAll()
+                       .requestMatchers("/api/**").authenticated()
+
                        // allow anonymous access to the root page
                        //.requestMatchers("/**").permitAll()
                        // all other requests
-                       .and().cors()
-                       .and().oauth2ResourceServer().jwt();
+                       .and().cors().and().csrf().disable()
+                       .oauth2ResourceServer().jwt();
            } catch (Exception e){
                throw new RuntimeException(e);
            }
